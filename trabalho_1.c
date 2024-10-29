@@ -23,42 +23,6 @@ int le_buffer(Buffer * buffer);
 void apaga_buffer(Buffer * buffer);
 void print_buffer(Buffer * buffer);
 
-// int main()
-// {
-// 	const int tamanho_buffer = 10;
-//
-// 	Buffer * buffer = cria_buffer(tamanho_buffer);
-// 	if (buffer == NULL) {
-// 		printf("Erro ao criar buffer\n");
-// 		return 1;
-// 	}
-//
-// 	int input = 1;
-// 	int numero;
-// 	while (input) {
-// 		printf("Digite uma opcao: (1) escreve no buffer; (2) le o buffer; (3) imprime buffer; (0) sair\n");
-// 		scanf("%d", &input);
-// 		switch (input) {
-// 			case 0:
-// 				apaga_buffer(buffer);
-// 			break;
-// 			case 1:
-// 				printf("digite um numero: ");
-// 				scanf("%d", &numero);
-// 				escreve_buffer(buffer, numero);
-// 				break;
-// 			case 2:
-// 				le_buffer(buffer);
-// 				break;
-// 			case 3:
-// 				print_buffer(buffer);
-// 				break;
-// 			default:
-// 				printf("Opcao invalida!");
-// 		}
-// 	}
-//     return 0;
-// }
 
 int main()
 {
@@ -77,13 +41,6 @@ int main()
 	return resultado != 0;
 }
 
-/* Teste de exemplo - apenas para demonstração */
-/***********************************************/
-// static char * teste_retorna1_caso_recebe1(void)
-// {
-// 	verifica("erro: deveria retornar 1", retornax(1) == 1);
-// 	return 0;
-// }
 
 static char * teste_cria_buffer(void) {
 	Buffer * buffer = cria_buffer(10);

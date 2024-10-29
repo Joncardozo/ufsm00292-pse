@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1586958759 source:c:\users\avell\onedrive\adjunto\disciplinas\projeto_sistemas_embarcados\aulas\aulas\2019-2020\aula 15\sol\pt_protocolo_tx_rx\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<string.h>
+	"pt.h"
+
+1159775576 c:\users\avell\onedrive\adjunto\disciplinas\projeto_sistemas_embarcados\aulas\aulas\2019-2020\aula 15\sol\pt_protocolo_tx_rx\pt.h
+	"lc.h"
+
+1109241419 c:\users\avell\onedrive\adjunto\disciplinas\projeto_sistemas_embarcados\aulas\aulas\2019-2020\aula 15\sol\pt_protocolo_tx_rx\lc.h
+	"lc-switch.h"
+
+1149334183 c:\users\avell\onedrive\adjunto\disciplinas\projeto_sistemas_embarcados\aulas\aulas\2019-2020\aula 15\sol\pt_protocolo_tx_rx\lc-switch.h
+
