@@ -46,6 +46,9 @@ void tarefa_9(void);
 void tarefa_10(void);
 // trabalho 5 - criar uma tarefa que roda 100ms modo preempitivo
 void tarefa_11(void);
+// trabalho 6 - buffer produtor / consumidor
+void tarefa_12(void); // produtor
+void tarefa_13(void); // consumidor
 
 /*
  * Configuracao dos tamanhos das pilhas
@@ -59,8 +62,10 @@ void tarefa_11(void);
 #define TAM_PILHA_7			(TAM_MINIMO_PILHA + 24)
 #define TAM_PILHA_8			(TAM_MINIMO_PILHA + 24)
 #define TAM_PILHA_9			(TAM_MINIMO_PILHA + 24)
-#define TAM_PILHA_10			(TAM_MINIMO_PILHA + 24)
-#define TAM_PILHA_11			(TAM_MINIMO_PILHA + 24)
+#define TAM_PILHA_10		(TAM_MINIMO_PILHA + 24)
+#define TAM_PILHA_11		(TAM_MINIMO_PILHA + 24)
+#define TAM_PILHA_12		(TAM_MINIMO_PILHA + 24)
+#define TAM_PILHA_13		(TAM_MINIMO_PILHA + 24)
 #define TAM_PILHA_OCIOSA	(TAM_MINIMO_PILHA + 24)
 
 /*
@@ -77,6 +82,8 @@ uint32_t PILHA_TAREFA_8[TAM_PILHA_8];
 uint32_t PILHA_TAREFA_9[TAM_PILHA_9];
 uint32_t PILHA_TAREFA_10[TAM_PILHA_10];
 uint32_t PILHA_TAREFA_11[TAM_PILHA_11];
+uint32_t PILHA_TAREFA_12[TAM_PILHA_12];
+uint32_t PILHA_TAREFA_13[TAM_PILHA_13];
 uint32_t PILHA_TAREFA_OCIOSA[TAM_PILHA_OCIOSA];
 
 /*
@@ -89,15 +96,19 @@ int main(void)
 	/* Criacao das tarefas */
 	/* Parametros: ponteiro, nome, ponteiro da pilha, tamanho da pilha, prioridade da tarefa */
 	
-	CriaTarefa(tarefa_1, "Tarefa 1", PILHA_TAREFA_1, TAM_PILHA_1, 2);
+//	CriaTarefa(tarefa_1, "Tarefa 1", PILHA_TAREFA_1, TAM_PILHA_1, 2);
 	
-	CriaTarefa(tarefa_2, "Tarefa 2", PILHA_TAREFA_2, TAM_PILHA_2, 1);
+//	CriaTarefa(tarefa_2, "Tarefa 2", PILHA_TAREFA_2, TAM_PILHA_2, 1);
 
     CriaTarefa(tarefa_9, "Tarefa 9", PILHA_TAREFA_9, TAM_PILHA_9, 1);
 
     CriaTarefa(tarefa_10, "Tarefa 10", PILHA_TAREFA_10, TAM_PILHA_10, 1);
 
 	CriaTarefa(tarefa_11, "Tarefa 11", PILHA_TAREFA_11, TAM_PILHA_11, 1);
+
+    CriaTarefa(tarefa_12, "Tarefa 12", PILHA_TAREFA_12, TAM_PILHA_12, 1);
+
+    CriaTarefa(tarefa_13, "Tarefa 13", PILHA_TAREFA_13, TAM_PILHA_13, 1);
 	
 	/* Cria tarefa ociosa do sistema */
 	CriaTarefa(tarefa_ociosa,"Tarefa ociosa", PILHA_TAREFA_OCIOSA, TAM_PILHA_OCIOSA, 0);
@@ -262,6 +273,25 @@ void tarefa_8(void)
 	}
 }
 
+// trabalho 4 - adiciona mais uma tarefa
+
+void tarefa_9(void)
+{
+	volatile uint16_t a = 0;
+	for(;;)
+	{
+		a++;
+
+		/* Liga LED. */
+		port_pin_set_output_level(LED_0_PIN, LED_0_ACTIVE);
+		TarefaEspera(100); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
+
+		/* Desliga LED. */
+		port_pin_set_output_level(LED_0_PIN, !LED_0_ACTIVE);
+		TarefaEspera(200); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
+	}
+}
+
 // tafera preemptiva
 void tarefa_10(void)
 {
@@ -269,21 +299,19 @@ void tarefa_10(void)
 	for(;;)
 	{
         REG_ATOMICA_INICIO();
-        led ^= led;
-		/* Liga LED. */
-		port_pin_set_output_level(LED_0_PIN, led);
-		TarefaEspera(100); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
+        for (int a = 0; a < 100; a++) {
+        	led ^= led;
+			port_pin_set_output_level(LED_0_PIN, led);
+        }
         REG_ATOMICA_FIM();
+        TarefaEspera(100);
 	}
 }
 
 
-semaforo_t Semaforo01 = {0,0};
-
 // tarefa cooperativa
 void tarefa_11(void)
 {
-    SemaforoAguarda(&SemaforoCheio);
 	int led = false;
 	for(;;)
 	{
@@ -292,5 +320,58 @@ void tarefa_11(void)
 		port_pin_set_output_level(LED_0_PIN, led);
 		TarefaEspera(100); 	/* tarefa 1 se coloca em espera por 3 marcas de tempo (ticks) */
 	}
-    SemaforoLibera(&SemaforoVazio);
+}
+
+uint8_t buffer[5]; /* declaracao de um buffer (vetor) ou fila circular */
+
+semaforo_t SemaforoCheio = {0,0}; /* declaracao e inicializacao de um semaforo */
+semaforo_t SemaforoVazio = {5,0}; /* declaracao e inicializacao de um semaforo */
+
+void tarefa_12(void)
+{
+
+	uint8_t a = 1;			/* inicializa��es para a tarefa */
+	uint8_t i = 0;
+
+	for(;;)
+	{
+		SemaforoAguarda(&SemaforoVazio);
+
+		buffer[i] = a++;
+		i = (i+1) % 5;
+
+		SemaforoLibera(&SemaforoCheio); /* tarefa libera semaforo para tarefa que esta esperando-o */
+
+		TarefaEspera(10); 	/* tarefa se coloca em espera por 10 marcas de tempo (ticks), equivale a 10ms */
+	}
+}
+
+void tarefa_13(void)
+{
+	static uint8_t f = 0;
+	volatile uint8_t valor;
+
+	for(;;)
+	{
+		volatile uint8_t contador;
+
+		do{
+			REG_ATOMICA_INICIO();
+			contador = SemaforoCheio.contador;
+			REG_ATOMICA_FIM();
+
+			if (contador == 0)
+			{
+				TarefaEspera(100);
+			}
+
+		} while (!contador);
+
+		SemaforoAguarda(&SemaforoCheio);
+
+		valor = buffer[f];
+		f = (f+1) % 5;
+
+		SemaforoLibera(&SemaforoVazio);
+	}
 }
